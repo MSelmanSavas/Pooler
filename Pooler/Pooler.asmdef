@@ -1,0 +1,19 @@
+{
+    "name": "Pooler",
+    "rootNamespace": "Pooler",
+    "references": [
+        "GUID:b85be91df02590f4eb95f04f56407a44",
+        "GUID:6022154eb400b39419f59fa201e99402",
+        "GUID:839bcc7ec0475e44a8c5556eb8b3996a",
+        "GUID:d83c011c5593f734b8c1be29f3f618af"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

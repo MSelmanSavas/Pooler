@@ -1,21 +1,26 @@
 using System;
-using System.Collections.Generic;
 using Pooler.Data;
-using UsefulDataTypes;
 
 namespace Pooler
 {
     [Serializable]
     public abstract class PoolableCollection<T> : IPoolElementWithCapacity
     {
+#if ODIN_INSPECTOR
         [Sirenix.OdinInspector.ShowInInspector]
+#endif
         protected BasicPoolElementDataHandler _poolHandler = new();
-        public BasePoolElementDataHandler GetPoolDataHandler() => _poolHandler;
 
+        public IPoolElementDataHandler GetPoolDataHandler() => _poolHandler;
+
+#if ODIN_INSPECTOR
         [Sirenix.OdinInspector.ShowInInspector]
+#endif
         public T Collection;
 
+#if ODIN_INSPECTOR
         [Sirenix.OdinInspector.ShowInInspector]
+#endif
         protected Action<IPoolElementWithCapacity, int, int> _onCapacityChanged;
 
         public PoolableCollection() { }

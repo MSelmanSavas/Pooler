@@ -38,8 +38,10 @@ namespace Pooler
         }
 
         public int CreateNewPoolElement(GameObject Prefab)
-        {
-            GameObject gameObject = MonoBehaviour.Instantiate(Prefab, Vector3.zero, Quaternion.identity, PoolManager.Instance.transform);
+        {   
+            //Will add generic parenting logic for assigning parent to gameobjects created by this pool
+            GameObject gameObject = GameObject.Instantiate(Prefab, Vector3.zero, Quaternion.identity, null);
+            
             PoolElements.Add(gameObject.GetComponent<IPoolElement>());
             return PoolElements.Count - 1;
         }
@@ -53,7 +55,13 @@ namespace Pooler
             }
             catch (System.Exception e)
             {
+                
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#else
+                Debug.LogError($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#endif
+
                 return false;
             }
         }
@@ -92,6 +100,11 @@ namespace Pooler
         public BasePoolConfigData GetPoolAsConfigData()
         {
             throw new NotImplementedException();
+        }
+
+        public bool CheckRequestDataType(object requestData)
+        {
+            return true;
         }
     }
 

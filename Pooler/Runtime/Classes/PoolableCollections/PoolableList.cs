@@ -16,11 +16,15 @@ public class PoolableList<T> : PoolableCollection<List<T>>
         Collection = new(capacity);
         _poolHandler.OnReturnToPool += ClearCollection;
     }
-
+    
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
     public override int GetCapacity() => Collection.Capacity;
 
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
     public override void SetCapacity(int Capacity)
     {
         int oldCapacity = Collection.Capacity;

@@ -1,15 +1,15 @@
 using System;
+using System.Collections.Generic;
 using Pooler.Config.Data;
 using Pooler.Request.Data;
 using UnityEngine;
-using UsefulDataTypes;
 
 namespace Pooler
 {
-    public class PoolManager : SingletonMonoBehaviour<PoolManager>
+    public class PoolManager
     {
         [Serializable]
-        protected class ObjectPoolsDictionary : SerializableDictionary<Type, IPool> { }
+        protected class ObjectPoolsDictionary : Dictionary<Type, IPool> { }
 
         [SerializeField]
 #if ODIN_INSPECTOR
@@ -25,7 +25,7 @@ namespace Pooler
         [field: SerializeField]
         public ScriptablePoolConfigContainer PoolConfigContainer { get; private set; }
 
-        protected override void AwakeInternal()
+        public PoolManager()
         {
             ObjectPools = new ObjectPoolsDictionary();
             LoadFromConfig();
@@ -44,9 +44,9 @@ namespace Pooler
             return ObjectPools[typeof(T1)].GetPoolObj<T1, T2>(requestData);
         }
 
-        public static T1 GetPoolElement<T1, T2>(T2 requestData)
+        public T1 GetPoolElement<T1, T2>(T2 requestData)
         where T1 : class, IPoolElement, new() where T2 : BasePoolRequestData
-        => Instance.GetPoolElementInternal<T1, T2>(requestData);
+        => GetPoolElementInternal<T1, T2>(requestData);
 
 
         protected internal bool TryGetPoolElementInternal<T1, T2>(T2 requestData, out T1 poolElement) where T1 : class, IPoolElement, new() where T2 : BasePoolRequestData
@@ -76,7 +76,7 @@ namespace Pooler
             }
         }
 
-        public static bool TryGetPoolElement<T1, T2>(T2 requestData, out T1 poolElement) where T1 : class, IPoolElement, new() where T2 : BasePoolRequestData => Instance.TryGetPoolElementInternal<T1, T2>(requestData, out poolElement);
+        public bool TryGetPoolElement<T1, T2>(T2 requestData, out T1 poolElement) where T1 : class, IPoolElement, new() where T2 : BasePoolRequestData => TryGetPoolElementInternal<T1, T2>(requestData, out poolElement);
 
         protected internal bool TryReturnElementToPoolInternal<T>(T poolElement) where T : class, IPoolElement
         {
@@ -101,7 +101,7 @@ namespace Pooler
             }
         }
 
-        public static bool TryReturnElementToPool<T>(T poolElement) where T : class, IPoolElement => Instance.TryReturnElementToPoolInternal(poolElement);
+        public bool TryReturnElementToPool<T>(T poolElement) where T : class, IPoolElement => TryReturnElementToPoolInternal(poolElement);
 
         /// <summary>
         /// Tries to add a new pool by type and config data.
@@ -143,7 +143,12 @@ namespace Pooler
             }
             catch (Exception e)
             {
+
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"Error while trying to add new pool with type : {poolType}! Error : {e}");
+#else
+                Debug.LogError($"Error while trying to add new pool with type : {poolType}! Error : {e}");
+#endif
                 return false;
             }
         }
@@ -156,7 +161,7 @@ namespace Pooler
         /// <param name="configData"></param>
         /// <param name="updateConfigData">ONLY USED FOR EDITOR</param>
         /// <returns></returns>
-        public static bool TryAddNewPool(Type poolType, BasePoolConfigData configData = null, bool updateConfigData = true) => Instance.TryAddNewPoolInternal(poolType, configData, updateConfigData);
+        public bool TryAddNewPool(Type poolType, BasePoolConfigData configData = null, bool updateConfigData = true) => TryAddNewPoolInternal(poolType, configData, updateConfigData);
 
 
         /// <summary>
@@ -166,13 +171,18 @@ namespace Pooler
         /// <param name="updateConfigData">ONLY USED FOR EDITOR</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static bool TryAddNewPool<T>(BasePoolConfigData configData = null, bool updateConfigData = true) where T : IPool => TryAddNewPool(typeof(T), configData, updateConfigData);
+        public bool TryAddNewPool<T>(BasePoolConfigData configData = null, bool updateConfigData = true) where T : IPool => TryAddNewPool(typeof(T), configData, updateConfigData);
 
         void LoadFromConfig()
         {
             if (PoolConfigContainer == null)
             {
+
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"No {nameof(PoolConfigContainer)} is attached! Cannot load from on on {GetType()}");
+#else
+                Debug.LogError($"No {nameof(PoolConfigContainer)} is attached! Cannot load from on on {this.GetType()}");
+#endif
                 return;
             }
 
@@ -183,14 +193,14 @@ namespace Pooler
         }
 
 #if UNITY_EDITOR
-        static void UpdateConfigData(IPool pool)
+        void UpdateConfigData(IPool pool)
         {
-            Instance.PoolConfigContainer?.AddOrUpdateConfigForType(pool, pool.GetPoolAsConfigData());
+            PoolConfigContainer?.AddOrUpdateConfigForType(pool, pool.GetPoolAsConfigData());
         }
 
-        static void UpdateConfigData(IPool pool, BasePoolConfigData data)
+        void UpdateConfigData(IPool pool, BasePoolConfigData data)
         {
-            Instance.PoolConfigContainer?.AddOrUpdateConfigForType(pool, data);
+            PoolConfigContainer?.AddOrUpdateConfigForType(pool, data);
         }
 # endif
     }

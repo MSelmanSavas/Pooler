@@ -9,10 +9,8 @@ namespace Pooler
 {
     internal class ClassPool<T> : IPool where T : class, IPoolElement, new()
     {
-        [Sirenix.OdinInspector.ShowInInspector]
         ClassPoolConfigData _configData;
 
-        [Sirenix.OdinInspector.ShowInInspector]
         ClassPoolRequestData _requestdata;
 
         public List<IPoolElement> PoolElements = new List<IPoolElement>();
@@ -30,10 +28,16 @@ namespace Pooler
            where T1 : class, IPoolElement
            where T2 : BasePoolRequestData
         {
-            if (requestData == null || requestData.GetType() != GetRequestDataType())
+            if (requestData == null || !CheckRequestDataType(requestData))
             {
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Given Request Data Type : {requestData.GetType()} does not matches with required Request Data Type : {GetRequestDataType()} on pool : {GetType()}! Using default request parameters...");
+#else
+                Debug.LogWarning($"Given Request Data Type : {requestData.GetType()} does not matches with required Request Data Type : {GetRequestDataType()} on pool : {GetType()}! Using default request parameters...");
+#endif
             }
+
+            _requestdata = requestData as ClassPoolRequestData;
 
             for (int i = 0; i < PoolElements.Count; i++)
             {
@@ -59,7 +63,11 @@ namespace Pooler
             }
             catch (System.Exception e)
             {
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#else
+                Debug.LogError($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#endif
                 return false;
             }
         }
@@ -78,7 +86,11 @@ namespace Pooler
         {
             if (configData == null || configData.GetType() != GetConfigDataType())
             {
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Given Config Data Type : {configData?.GetType()} does not matches with required Config Data Type : {GetConfigDataType()} on pool : {GetType()}! Using default config parameters...");
+#else
+                Debug.LogWarning($"Given Config Data Type : {configData?.GetType()} does not matches with required Config Data Type : {GetConfigDataType()} on pool : {GetType()}! Using default config parameters...");
+#endif
 
                 _configData = ClassPoolConfigData.s_DefaultData;
             }
@@ -101,6 +113,16 @@ namespace Pooler
             };
 
             return classPoolConfigData;
+        }
+
+        public bool CheckRequestDataType(object requestData)
+        {
+            if(requestData.GetType() != GetRequestDataType())
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 

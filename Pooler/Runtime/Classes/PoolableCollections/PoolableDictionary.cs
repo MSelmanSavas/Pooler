@@ -18,8 +18,10 @@ public class PoolableDictionary<T1, T2> : PoolableCollection<Dictionary<T1, T2>>
         _capacity = capacity;
         _poolHandler.OnReturnToPool += ClearCollection;
     }
-
+    
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
     public override int GetCapacity() => _capacity;
     public override void SetCapacity(int Capacity)
     {

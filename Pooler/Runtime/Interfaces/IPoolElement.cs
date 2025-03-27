@@ -4,6 +4,6 @@ namespace Pooler
 {
     public interface IPoolElement
     {
-        public BasePoolElementDataHandler GetPoolDataHandler();
+        public IPoolElementDataHandler GetPoolDataHandler();
     }
 }

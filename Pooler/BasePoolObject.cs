@@ -25,6 +25,6 @@ namespace Pooler
         }
 
         protected BasicPoolElementDataHandler _poolHandler = new();
-        public BasePoolElementDataHandler GetPoolDataHandler() => _poolHandler;
+        public IPoolElementDataHandler GetPoolDataHandler() => _poolHandler;
     }
 }

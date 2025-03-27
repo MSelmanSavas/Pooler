@@ -1,3 +1,4 @@
+#if USEFUL_DATA_TYPES_ENABLED
 using System;
 using Pooler;
 using UsefulDataTypes;
@@ -22,7 +23,10 @@ public class PoolablePreAllocatedQueue<T> : PoolableCollection<PreAllocatedQueue
         _poolHandler.OnReturnToPool += ClearCollection;
     }
 
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
+
     public override int GetCapacity() => _capacity;
     public override void SetCapacity(int Capacity)
     {
@@ -45,3 +49,4 @@ public class PoolablePreAllocatedQueue<T> : PoolableCollection<PreAllocatedQueue
     public void Enquque(T value) => Collection.Enqueue(value);
     public void Dequeue() => Collection.Dequeue();
 }
+#endif

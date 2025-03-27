@@ -19,7 +19,9 @@ public class PoolableHashSet<T> : PoolableCollection<HashSet<T>>
         _poolHandler.OnReturnToPool += ClearCollection;
     }
 
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
     public override int GetCapacity() => _capacity;
 
     public override void SetCapacity(int Capacity)

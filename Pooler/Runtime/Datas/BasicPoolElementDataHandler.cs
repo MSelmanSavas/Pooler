@@ -1,23 +1,24 @@
 namespace Pooler.Data
 {
     [System.Serializable]
-    public class BasicPoolElementDataHandler : BasePoolElementDataHandler
+    public class BasicPoolElementDataHandler : IPoolElementDataHandler
     {
-        [Sirenix.OdinInspector.ShowInInspector]
-        protected bool _isInPool = true;
+        protected bool isInPool = true;
+        
         public System.Action OnGetFromPool;
         public System.Action OnReturnToPool;
-        public override bool IsInPool() => _isInPool;
 
-        public override void GetFromPool()
+        public bool IsInPool() => isInPool;
+
+        public void GetFromPool()
         {
-            _isInPool = false;
+            isInPool = false;
             OnGetFromPool?.Invoke();
         }
 
-        public override void ReturnToPool()
+        public void ReturnToPool()
         {
-            _isInPool = true;
+            isInPool = true;
             OnReturnToPool?.Invoke();
         }
     }

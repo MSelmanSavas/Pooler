@@ -1,3 +1,4 @@
+#if USEFUL_DATA_TYPES_ENABLED
 using System;
 using Pooler;
 using UsefulDataTypes;
@@ -22,7 +23,9 @@ public class PoolablePreAllocatedStack<T> : PoolableCollection<PreAllocatedStack
         _poolHandler.OnReturnToPool += ClearCollection;
     }
 
+#if ODIN_INSPECTOR
     [Sirenix.OdinInspector.ShowInInspector]
+#endif
     public override int GetCapacity() => _capacity;
     public override void SetCapacity(int Capacity)
     {
@@ -44,3 +47,4 @@ public class PoolablePreAllocatedStack<T> : PoolableCollection<PreAllocatedStack
     public void Push(T value) => Collection.Push(value);
     public void Pop() => Collection.Pop();
 }
+#endif

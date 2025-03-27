@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Pooler.Config.Data;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -13,7 +12,7 @@ namespace Pooler
 {
     [System.Serializable]
     [CreateAssetMenu(fileName = "NewScriptablePoolConfigContainer", menuName = "Pooler/Config/Scriptable Pool Config Container", order = 0)]
-    public class ScriptablePoolConfigContainer : SerializedScriptableObject
+    public class ScriptablePoolConfigContainer : ScriptableObject
     {
         public Dictionary<System.Type, BasePoolConfigData> TypeToConfigDatas = new();
 

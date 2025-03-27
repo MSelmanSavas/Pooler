@@ -5,21 +5,16 @@ using System.Linq;
 using Pooler.Config.Data;
 using Pooler.Request.Data;
 using UnityEngine;
-using UsefulExtensions.Dictionary;
-using UsefulExtensions.List;
 
 namespace Pooler
 {
     [Serializable]
     internal class CollectionPool<T> : IPool where T : class, IPoolElementWithCapacity, new()
     {
-        [Sirenix.OdinInspector.ShowInInspector]
         CollectionPoolConfigData _configData;
 
-        [Sirenix.OdinInspector.ShowInInspector]
         CollectionPoolRequestData _requestdata;
 
-        [Sirenix.OdinInspector.ShowInInspector]
         Dictionary<int, List<T>> _poolElements = new();
         public IEnumerator GetPoolEnumerator() => _poolElements.GetEnumerator();
 
@@ -29,10 +24,13 @@ namespace Pooler
             where T1 : class, IPoolElement
             where T2 : BasePoolRequestData
         {
-            if (requestData.GetType() != GetRequestDataType())
+            if (!CheckRequestDataType(requestData))
             {
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Given Request Data Type : {requestData.GetType()} does not matches with required Request Data Type : {GetRequestDataType()} on pool : {GetType()}! Using default request parameters...");
-
+#else
+                Debug.LogWarning($"Given Request Data Type : {requestData.GetType()} does not matches with required Request Data Type : {GetRequestDataType()} on pool : {GetType()}! Using default request parameters...");
+#endif
                 _requestdata = CollectionPoolRequestData.DefaultData;
             }
             else
@@ -51,9 +49,11 @@ namespace Pooler
                         return poolElements[i] as T1;
                     }
                 }
-
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Collection Pool of : {GetType()} does not have any available collection with given capacity : {requestedCapacity}! Creating a new one in given capacity...");
-
+#else
+                Debug.LogWarning($"Collection Pool of : {GetType()} does not have any available collection with given capacity : {requestedCapacity}! Creating a new one in given capacity...");
+#endif
                 var poolElement = poolElements.AddWithReturn(new());
                 poolElement.SetCapacity(requestedCapacity);
                 poolElement.AddOnCapacityChanged(ChangePoolBucketOnCapacityChange);
@@ -65,7 +65,11 @@ namespace Pooler
                 }
                 catch (System.Exception e)
                 {
+#if LOGGER_ENABLED
                     UnityLogger.LogErrorWithTag($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#else
+                    Debug.LogError($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#endif
                 }
 
                 return poolElement as T1;
@@ -84,9 +88,11 @@ namespace Pooler
                                 return poolElement.Value[i] as T1;
                             }
                         }
-
+#if LOGGER_ENABLED
                         UnityLogger.LogWarningWithTag($"Collection Pool of : {GetType()} does not have any non used collection on capacity: {requestedCapacity}! Found a bigger pool with capacity : {poolElement.Key} but here is no unused pools in that capacity! Creating a new collection pool with given capacity...");
-
+#else
+                        Debug.LogWarning($"Collection Pool of : {GetType()} does not have any non used collection on capacity: {requestedCapacity}! Found a bigger pool with capacity : {poolElement.Key} but here is no unused pools in that capacity! Creating a new collection pool with given capacity...");
+#endif
                         var foundElement = poolElement.Value.AddWithReturn(new());
                         foundElement.SetCapacity(poolElement.Key);
                         foundElement.AddOnCapacityChanged(ChangePoolBucketOnCapacityChange);
@@ -98,16 +104,23 @@ namespace Pooler
                         }
                         catch (System.Exception e)
                         {
+#if LOGGER_ENABLED
                             UnityLogger.LogErrorWithTag($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#else
+                            Debug.LogError($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#endif
                         }
 
                         return foundElement as T1;
                     }
                 }
 
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Collection Pool of : {GetType()} does not have any available collection pool with given capacity : {requestedCapacity}! Creating a new collection pool with given capacity...");
-
-                var addedNewCollectionList = _poolElements.AddWithReturn(requestedCapacity, new List<T>());
+#else
+                Debug.LogWarning($"Collection Pool of : {GetType()} does not have any available collection pool with given capacity : {requestedCapacity}! Creating a new collection pool with given capacity...");
+#endif
+                var addedNewCollectionList = _poolElements.AddWithReturn(requestedCapacity, new List<T>()).value;
 
                 for (int i = 0; i < CollectionPoolConfigData.s_NonAvailableRequestCapacityCreateCount; i++)
                 {
@@ -134,7 +147,12 @@ namespace Pooler
             }
             catch (System.Exception e)
             {
+
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#else
+                Debug.LogError($"Error while trying to return : {poolElement} to pool :{this.GetType()}! Error : {e}");
+#endif
                 return false;
             }
         }
@@ -155,7 +173,13 @@ namespace Pooler
             }
             catch (System.Exception e)
             {
+
+#if LOGGER_ENABLED
                 UnityLogger.LogErrorWithTag($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#else
+                Debug.LogError($"Error calling OnCapacityChange action on pool : {GetType()}! Error : {e}");
+#endif
+
             }
         }
 
@@ -172,8 +196,11 @@ namespace Pooler
         {
             if (configData == null || configData.GetType() != GetConfigDataType())
             {
+#if LOGGER_ENABLED
                 UnityLogger.LogWarningWithTag($"Given Config Data Type : {configData?.GetType()} does not matches with required Config Data Type : {GetConfigDataType()} on pool : {GetType()}! Using default config parameters...");
-
+#else
+                Debug.LogWarning($"Given Config Data Type : {configData?.GetType()} does not matches with required Config Data Type : {GetConfigDataType()} on pool : {GetType()}! Using default config parameters...");
+#endif
                 _configData = CollectionPoolConfigData.s_DefaultData;
             }
             else
@@ -183,7 +210,7 @@ namespace Pooler
 
             foreach (var collectionCapacityAndCount in _configData.CollectionCapacitiesAndCounts)
             {
-                var collectionList = _poolElements.AddWithReturn(collectionCapacityAndCount.Capacity, new List<T>());
+                var collectionList = _poolElements.AddWithReturn(collectionCapacityAndCount.Capacity, new List<T>()).value;
 
                 for (int i = 0; i < collectionCapacityAndCount.Count; i++)
                 {
@@ -197,7 +224,6 @@ namespace Pooler
             return true;
         }
 
-        [Sirenix.OdinInspector.Button]
         public BasePoolConfigData GetPoolAsConfigData()
         {
             CollectionPoolConfigData configData = new CollectionPoolConfigData();
@@ -217,5 +243,14 @@ namespace Pooler
             return configData;
         }
 
+        public bool CheckRequestDataType(object requestData)
+        {
+            if(requestData.GetType() != GetRequestDataType())
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
